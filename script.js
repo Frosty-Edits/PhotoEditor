@@ -80,3 +80,14 @@ function handleFile(file) {
     reader.readAsDataURL(file);
 }
 
+document.getElementById("btnSave").addEventListener("click", () => {
+    if (!currentImage) return;
+    commitFloatingLayer(); 
+    ctx.putImageData(currentImage, 0, 0); 
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = "imagine_editata.png";
+    a.click();
+    draw(); 
+});
+
