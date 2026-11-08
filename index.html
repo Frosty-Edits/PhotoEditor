@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="toolbar sidebar-pastel">
+        <h2 class="app-title">Image Editor</h2>
+
+        <div class="group">
+            <h3>Fișier & Reset</h3>
+            <label for="fileBrowser" class="custom-file-upload">
+                Alege Imagine
+            </label>
+            <input id="fileBrowser" type="file" accept="image/*">
+            <button id="btnSave" class="btn-primary">Salvează Imaginea</button>
+            <button id="btnReset" class="btn-danger">Resetare Totală</button>
+        </div>
+
+        <div class="group">
+            <h3>Selecție & Crop</h3>
+            <p class="hint-text">Click & Drag pentru selecție. Shift+Drag pentru mutare.</p>
+            <div class="btn-row">
+                <button id="btnCrop" class="btn-secondary">Crop</button>
+                <button id="btnDelete" class="btn-secondary">Șterge</button>
+            </div>
+        </div>
+
+        <div class="group">
+            <h3>Filtre & Efecte</h3>
+            <div class="effects-grid">
+                <button id="btnGrayscale" class="btn-effect">Alb-Negru</button>
+                <button id="btnThreshold" class="btn-effect" style="background:#333; color:#fff;">Threshold</button>
+                <button id="btnInvert" class="btn-effect">Invers</button>
+                <button id="btnSepia" class="btn-effect" style="background:#f4e4bc; color:#5b4627">Sepia</button>
+                
+                <button id="btnRed" class="btn-effect" style="background:#ffcccb; color:#8b0000">Roșu</button>
+                <button id="btnGreen" class="btn-effect" style="background:#c2f0c2; color:#006400">Verde</button>
+                <button id="btnBlue" class="btn-effect" style="background:#ccccff; color:#00008b">Albastru</button>
+                <button id="btn2Channels" class="btn-effect" style="background:#ffb3ff; color:#800080">2 Canale (R+B)</button>
+            </div>
+            
+            <div style="margin-top: 10px; border-top: 1px dashed #eddbe5; padding-top: 10px;">
+                <label for="pixelSize">Mărime Pixelate:</label>
+                 <div style="display: flex; gap: 5px;">
+                    <input type="number" id="pixelSize" value="15" min="2" style="width: 60px;">
+                    <button id="btnPixelate" class="btn-effect" style="flex-grow: 1;">Pixelate</button>
+                 </div>
+            </div>
+        </div>
+
+        <div class="group">
+            <h3>Scalare (Mărime)</h3>
+            <div style="display: flex; gap: 5px;">
+                <input type="number" id="scaleWidth" placeholder="Lățime (W)">
+                <input type="number" id="scaleHeight" placeholder="Înălțime (H)">
+            </div>
+            <button id="btnScale" class="btn-primary">Aplică Scalare</button>
+        </div>
+
+        <div class="group">
+            <h3>Adaugă Text</h3>
+            <input type="text" id="txtInput" placeholder="Mesajul tău...">
+            <div style="display: flex; gap: 5px;">
+                 <input type="color" id="txtColor" value="#ff69b4" style="height: 35px; flex-grow: 1; padding: 0;">
+                 <input type="number" id="txtSize" value="40" placeholder="Mărime" style="width: 70px;">
+            </div>
+            <div style="display: flex; gap: 5px;">
+                <input type="number" id="txtX" placeholder="X" value="50">
+                <input type="number" id="txtY" placeholder="Y" value="100">
+            </div>
+            <button id="btnAddText" class="btn-secondary">Scrie Text 🖋️</button>
+        </div>
+
+        <div class="group no-border">
+            <h3>Histogramă</h3>
+            <canvas id="histograma" width="300" height="120"></canvas>
+        </div>
+    </div>
+
+    <div class="canvas-container" id="dropZone">
+        <canvas id="canvas">Browserul nu suportă Canvas.</canvas>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
