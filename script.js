@@ -91,3 +91,16 @@ document.getElementById("btnSave").addEventListener("click", () => {
     draw(); 
 });
 
+document.getElementById("btnReset").addEventListener("click", () => {
+    if (!originalImage) return;
+    canvas.width = originalImage.width;
+    canvas.height = originalImage.height;
+    ctx.putImageData(originalImage, 0, 0);
+    updateGlobalImage();
+    selection = { x: 0, y: 0, w: 0, h: 0 };
+    floatingCanvas = null;
+    commitAndClearMemory();
+    updateHistogram();
+    draw();
+});
+

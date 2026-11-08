@@ -1,3 +1,7 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
     display: flex;
@@ -11,6 +15,14 @@ body {
     width: 300px;
     padding: 20px;
     background: white;
+    border-radius: 12px;
+}
+
+.group {
+    margin-bottom: 15px;
+    padding: 12px;
+    border: 1px solid #f3e1ec;
+    border-radius: 10px;
 }
 
 .canvas-container {
@@ -20,6 +32,7 @@ body {
     justify-content: center;
     padding: 20px;
     background: white;
+    border-radius: 12px;
 }
 
 canvas {
