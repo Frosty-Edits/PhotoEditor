@@ -124,3 +124,72 @@ function draw() {
     }
 }
 
+canvas.addEventListener("mousedown", (e) => {
+    if (!currentImage) return;
+    const pos = getMousePos(e); 
+    const mouseX = pos.x; const mouseY = pos.y;
+
+    const isInsideSelection = selection.w > 0 && 
+        mouseX >= selection.x && mouseX <= selection.x + selection.w &&
+        mouseY >= selection.y && mouseY <= selection.y + selection.h;
+
+    if (e.shiftKey && isInsideSelection) {
+        isMoving = true;
+        moveOffsetX = mouseX - selection.x;
+        moveOffsetY = mouseY - selection.y;
+        if (!floatingCanvas) {
+            floatingCanvas = document.createElement("canvas");
+            floatingCanvas.width = selection.w; 
+            floatingCanvas.height = selection.h;
+            const fCtx = floatingCanvas.getContext("2d");
+            
+            const sx = Math.floor(selection.x);
+            const sy = Math.floor(selection.y);
+            const sw = Math.floor(selection.w);
+            const sh = Math.floor(selection.h);
+
+            try {
+
+                ctx.putImageData(currentImage, 0, 0); 
+                const selectedData = ctx.getImageData(sx, sy, sw, sh);
+                fCtx.putImageData(selectedData, 0, 0);
+                ctx.fillStyle = "white";
+                ctx.fillRect(sx, sy, sw, sh);
+                updateGlobalImage();
+            } catch(err) {}
+        }
+    } else {
+        commitFloatingLayer(); 
+        commitAndClearMemory();
+        isSelecting = true;
+        isMoving = false;
+        startX = mouseX; startY = mouseY;
+        selection = { x: startX, y: startY, w: 0, h: 0 };
+    }
+    draw();
+});
+
+canvas.addEventListener("mousemove", (e) => {
+    if (!currentImage) return;
+    const pos = getMousePos(e);
+    
+    if (isMoving) {
+        selection.x = pos.x - moveOffsetX; 
+        selection.y = pos.y - moveOffsetY;
+        draw(); 
+    } else if (isSelecting) {
+        let width = pos.x - startX; let height = pos.y - startY;
+        selection.w = Math.abs(width); selection.h = Math.abs(height);
+        selection.x = (width < 0) ? pos.x : startX;
+        selection.y = (height < 0) ? pos.y : startY;
+        draw(); 
+    }
+});
+
+canvas.addEventListener("mouseup", () => {
+    isSelecting = false; 
+    isMoving = false;
+    hideSelectionBorder = false;
+    draw();
+});
+
