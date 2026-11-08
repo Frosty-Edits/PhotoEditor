@@ -104,3 +104,23 @@ document.getElementById("btnReset").addEventListener("click", () => {
     draw();
 });
 
+function draw() {
+    if (!currentImage) return;
+    ctx.putImageData(currentImage, 0, 0);
+    if (floatingCanvas) {
+        ctx.drawImage(floatingCanvas, selection.x, selection.y);
+    }
+
+    updateHistogram();
+    if (selection.w > 0 && selection.h > 0 && !hideSelectionBorder) {
+        ctx.save();
+        ctx.strokeStyle = "#ff69b4"; 
+        ctx.lineWidth = canvas.width > 2000 ? 4 : 2; 
+        ctx.setLineDash([8, 4]);
+        ctx.strokeRect(selection.x, selection.y, selection.w, selection.h);
+        ctx.fillStyle = "rgba(255, 105, 180, 0.15)";
+        ctx.fillRect(selection.x, selection.y, selection.w, selection.h);
+        ctx.restore();
+    }
+}
+
