@@ -358,3 +358,90 @@ document.getElementById("btnSepia").addEventListener("click", () => {
     });
 });
 
+document.getElementById("btnPixelate").addEventListener("click", () => {
+    if (floatingCanvas && selection.w > 0) {
+        const fCtx = floatingCanvas.getContext("2d");
+        const size = parseInt(document.getElementById("pixelSize").value) || 10;
+        for(let y = 0; y < floatingCanvas.height; y += size) {
+            for(let x = 0; x < floatingCanvas.width; x += size) {
+                const p = fCtx.getImageData(Math.min(x+size/2, floatingCanvas.width-1), Math.min(y+size/2, floatingCanvas.height-1), 1, 1).data;
+                fCtx.fillStyle = `rgb(${p[0]},${p[1]},${p[2]})`;
+                fCtx.fillRect(x, y, size, size);
+            }
+        }
+        draw(); return;
+    }
+    let sx, sy, sw, sh;
+    if (selection.w > 0 && selection.h > 0) {
+        sx = Math.floor(selection.x); sy = Math.floor(selection.y);
+        sw = Math.floor(selection.w); sh = Math.floor(selection.h);
+    } else {
+        sx = 0; sy = 0; sw = canvas.width; sh = canvas.height;
+    }
+    ctx.putImageData(currentImage, 0, 0);
+    if (!tempOriginalData) { tempOriginalData = ctx.getImageData(sx, sy, sw, sh); } 
+    else { if (tempOriginalData.width === sw && tempOriginalData.height === sh) { ctx.putImageData(tempOriginalData, sx, sy); } else { tempOriginalData = ctx.getImageData(sx, sy, sw, sh); } }
+
+    const size = parseInt(document.getElementById("pixelSize").value) || 10;
+    for(let y = sy; y < sy + sh; y += size) {
+        for(let x = sx; x < sx + sw; x += size) {
+            const sampleX = Math.min(x + size/2, canvas.width - 1);
+            const sampleY = Math.min(y + size/2, canvas.height - 1);
+            const p = ctx.getImageData(sampleX, sampleY, 1, 1).data;
+            ctx.fillStyle = `rgb(${p[0]},${p[1]},${p[2]})`;
+            ctx.fillRect(x, y, size, size);
+        }
+    }
+    updateGlobalImage();
+    hideSelectionBorder = true;
+    draw();
+});
+
+function updateHistogram() {
+    try {
+        let sx, sy, sw, sh;
+        if (floatingCanvas && selection.w > 0) {
+             const fCtx = floatingCanvas.getContext("2d");
+             const imgData = fCtx.getImageData(0, 0, floatingCanvas.width, floatingCanvas.height).data;
+             drawHistoFromData(imgData);
+             return;
+        }
+        if (selection.w > 0 && selection.h > 0) {
+            sx = Math.floor(selection.x); sy = Math.floor(selection.y);
+            sw = Math.floor(selection.w); sh = Math.floor(selection.h);
+            if (sx < 0) { sw += sx; sx = 0; }
+            if (sy < 0) { sh += sy; sy = 0; }
+            if (sx + sw > canvas.width) sw = canvas.width - sx;
+            if (sy + sh > canvas.height) sh = canvas.height - sy;
+        } else {
+            sx = 0; sy = 0; sw = canvas.width; sh = canvas.height;
+        }
+        if (sw <= 0 || sh <= 0) return;
+        const imgData = ctx.getImageData(sx, sy, sw, sh).data;
+        drawHistoFromData(imgData);
+
+    } catch (err) { console.error(err); }
+}
+
+function drawHistoFromData(imgData) {
+    const rCount = new Array(256).fill(0);
+    const gCount = new Array(256).fill(0);
+    const bCount = new Array(256).fill(0);
+    for (let i = 0; i < imgData.length; i += 4) {
+        rCount[imgData[i]]++; gCount[imgData[i+1]]++; bCount[imgData[i+2]]++;
+    }
+    let maxCount = Math.max(...rCount, ...gCount, ...bCount) || 1;
+    histoCtx.fillStyle = "#ffffff";
+    histoCtx.fillRect(0, 0, histoCanvas.width, histoCanvas.height);
+    histoCtx.globalCompositeOperation = 'multiply'; 
+    const barWidth = histoCanvas.width / 256;
+    const drawBars = (counts, color) => {
+        histoCtx.fillStyle = color;
+        for (let i = 0; i < 256; i++) {
+            const h = (counts[i] / maxCount) * histoCanvas.height * 0.9;
+            histoCtx.fillRect(i * barWidth, histoCanvas.height - h, barWidth, h);
+        }
+    };
+    drawBars(rCount, "#ffb3ba"); drawBars(gCount, "#baffc9"); drawBars(bCount, "#bae1ff");
+    histoCtx.globalCompositeOperation = 'source-over';
+}
