@@ -207,3 +207,50 @@ document.getElementById("btnCrop").addEventListener("click", () => {
     draw();
 });
 
+document.getElementById("btnDelete").addEventListener("click", () => {
+    commitAndClearMemory();
+    ctx.putImageData(currentImage, 0, 0);
+    
+    ctx.fillStyle = "white";
+    if (selection.w > 0 && selection.h > 0) {
+        ctx.fillRect(selection.x, selection.y, selection.w, selection.h);
+    } else {
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    updateGlobalImage();
+    selection = { x: 0, y: 0, w: 0, h: 0 };
+    draw();
+});
+
+document.getElementById("btnScale").addEventListener("click", () => {
+    if (!originalImage) return;
+    commitAndClearMemory();
+
+    const wInput = document.getElementById("scaleWidth").value;
+    const hInput = document.getElementById("scaleHeight").value;
+    let newW = parseInt(wInput); let newH = parseInt(hInput);
+    const aspectRatio = originalImage.width / originalImage.height;
+
+    if (newW && newH) { } 
+    else if (newW && !newH) { newH = newW / aspectRatio; } 
+    else if (!newW && newH) { newW = newH * aspectRatio; } 
+    else { return alert("Introdu Lățimea sau Înălțimea!"); }
+
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = newW; tempCanvas.height = newH;
+    const tCtx = tempCanvas.getContext("2d");
+    const auxCanvas = document.createElement("canvas");
+    auxCanvas.width = originalImage.width; auxCanvas.height = originalImage.height;
+    auxCanvas.getContext("2d").putImageData(originalImage, 0, 0);
+
+    tCtx.imageSmoothingEnabled = true; tCtx.imageSmoothingQuality = "high";
+    tCtx.drawImage(auxCanvas, 0, 0, newW, newH);
+
+    canvas.width = newW; canvas.height = newH;
+    ctx.drawImage(tempCanvas, 0, 0);
+    updateGlobalImage();
+    
+    selection = { x: 0, y: 0, w: 0, h: 0 };
+    draw();
+});
+
