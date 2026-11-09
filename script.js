@@ -193,3 +193,17 @@ canvas.addEventListener("mouseup", () => {
     draw();
 });
 
+document.getElementById("btnCrop").addEventListener("click", () => {
+    if (selection.w < 1) return alert("Selectează o zonă!");
+    commitAndClearMemory(); 
+    
+    ctx.putImageData(currentImage, 0, 0); 
+    const cutData = ctx.getImageData(selection.x, selection.y, selection.w, selection.h);
+    canvas.width = selection.w; canvas.height = selection.h;
+    ctx.putImageData(cutData, 0, 0);
+    updateGlobalImage();
+    
+    selection = { x: 0, y: 0, w: 0, h: 0 };
+    draw();
+});
+
