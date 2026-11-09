@@ -254,3 +254,107 @@ document.getElementById("btnScale").addEventListener("click", () => {
     draw();
 });
 
+document.getElementById("btnAddText").addEventListener("click", () => {
+    commitAndClearMemory();
+    const text = document.getElementById("txtInput").value;
+    const color = document.getElementById("txtColor").value;
+    const size = document.getElementById("txtSize").value;
+    const x = parseInt(document.getElementById("txtX").value) || 50;
+    const y = parseInt(document.getElementById("txtY").value) || 50;
+    if (!text) return;
+    
+    ctx.putImageData(currentImage, 0, 0);
+    ctx.fillStyle = color;
+    ctx.font = `bold ${size}px 'Poppins', sans-serif`;
+    ctx.fillText(text, x, y);
+    updateGlobalImage();
+    draw();
+});
+
+function applyEffect(effectFn) {
+    if (floatingCanvas && selection.w > 0) {
+        const fCtx = floatingCanvas.getContext("2d");
+        const imageData = fCtx.getImageData(0, 0, floatingCanvas.width, floatingCanvas.height);
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) effectFn(data, i);
+        fCtx.putImageData(imageData, 0, 0);
+        draw(); 
+        return; 
+    }
+    let sx, sy, sw, sh;
+    if (selection.w > 0 && selection.h > 0) {
+        sx = Math.floor(selection.x); sy = Math.floor(selection.y);
+        sw = Math.floor(selection.w); sh = Math.floor(selection.h);
+    } else {
+        sx = 0; sy = 0; sw = canvas.width; sh = canvas.height;
+    }
+
+    ctx.putImageData(currentImage, 0, 0);
+
+    let sourceData;
+    if (!tempOriginalData) {
+        tempOriginalData = ctx.getImageData(sx, sy, sw, sh);
+    } else {
+        if (tempOriginalData.width === sw && tempOriginalData.height === sh) {
+            ctx.putImageData(tempOriginalData, sx, sy);
+        } else {
+            tempOriginalData = ctx.getImageData(sx, sy, sw, sh);
+        }
+    }
+
+    sourceData = new ImageData(
+        new Uint8ClampedArray(tempOriginalData.data), 
+        tempOriginalData.width, 
+        tempOriginalData.height
+    );
+
+    const data = sourceData.data;
+    for (let i = 0; i < data.length; i += 4) {
+        effectFn(data, i);
+    }
+
+    ctx.putImageData(sourceData, sx, sy);
+    updateGlobalImage();
+    hideSelectionBorder = true;
+    draw();
+}
+
+document.getElementById("btnGrayscale").addEventListener("click", () => {
+    applyEffect((data, i) => {
+        const avg = (data[i] + data[i+1] + data[i+2]) / 3;
+        data[i] = avg; data[i+1] = avg; data[i+2] = avg;
+    });
+});
+document.getElementById("btnInvert").addEventListener("click", () => {
+    applyEffect((data, i) => {
+        data[i] = 255 - data[i]; data[i+1] = 255 - data[i+1]; data[i+2] = 255 - data[i+2]; 
+    });
+});
+document.getElementById("btnThreshold").addEventListener("click", () => {
+    applyEffect((data, i) => {
+        const avg = (data[i] + data[i+1] + data[i+2]) / 3;
+        const val = avg > 128 ? 255 : 0;
+        data[i] = val; data[i+1] = val; data[i+2] = val;
+    });
+});
+document.getElementById("btn2Channels").addEventListener("click", () => {
+    applyEffect((data, i) => { data[i+1] = 0; });
+});
+document.getElementById("btnRed").addEventListener("click", () => {
+    applyEffect((data, i) => { data[i+1] = 0; data[i+2] = 0; });
+});
+document.getElementById("btnGreen").addEventListener("click", () => {
+    applyEffect((data, i) => { data[i] = 0; data[i+2] = 0; });
+});
+document.getElementById("btnBlue").addEventListener("click", () => {
+    applyEffect((data, i) => { data[i] = 0; data[i+1] = 0; });
+});
+document.getElementById("btnSepia").addEventListener("click", () => {
+    applyEffect((data, i) => {
+        const r = data[i]; const g = data[i+1]; const b = data[i+2];
+        data[i] = (r * 0.393) + (g * 0.769) + (b * 0.189);
+        data[i+1] = (r * 0.349) + (g * 0.686) + (b * 0.168);
+        data[i+2] = (r * 0.272) + (g * 0.534) + (b * 0.131);
+    });
+});
+
